@@ -1,9 +1,12 @@
 node_modules
+chrome_data
+chromium
 dist
 out
 .DS_Store
 .eslintcache
 *.log*
+
 /src/main/server/window-api/build/
 
 # Playwright
@@ -11,3 +14,4 @@ out
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+

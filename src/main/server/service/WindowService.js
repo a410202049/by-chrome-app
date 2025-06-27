@@ -79,7 +79,7 @@ class WindowService {
     // 生产环境: 返回应用安装目录（如 /Applications/ 或 C:\Program Files\）
     this.appPath = app.getAppPath();
     //默认浏览器
-    this.chromePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+    this.chromePath = path.join(this.appPath, 'chromium', 'chrome.exe');
 
     this.HOST = "127.0.0.1";
 
@@ -425,6 +425,7 @@ class WindowService {
       }
 
       const chromeEXE = config.chromePath ? config.chromePath : this.chromePath;
+      console.log(chromeEXE);
       //判断浏览器是否存在
       if (!fs.existsSync(chromeEXE)) {
         WSService.broadcast({

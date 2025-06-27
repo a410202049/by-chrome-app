@@ -43,7 +43,7 @@
     "sass-loader": "^16.0.5",
     "socks": "^2.8.4",
     "socks-proxy-agent": "^8.0.5",
-    "sqlite3": "5.1.6",
+    "sqlite3": "^5.1.6",
     "uiohook-napi": "^1.5.4",
     "vue-router": "^4.5.0",
     "vuex": "^4.1.0",

@@ -102,10 +102,9 @@
                 <el-dropdown-menu>
                   <el-dropdown-item @click="getOpenList">刷新页面</el-dropdown-item>
                   <el-dropdown-item @click="onOpenBindProxy">代理配置</el-dropdown-item>
-                  <el-dropdown-item @click="onBatchTagBtn">批量标签</el-dropdown-item>
                   <el-dropdown-item @click="onBatchRemark">批量备注</el-dropdown-item>
                   <el-dropdown-item @click="batchDelWin">批量删除</el-dropdown-item>
-                  <el-dropdown-item @click="onBatchClearProxy('select')">批绑代理</el-dropdown-item>
+                  <el-dropdown-item @click="onBatchClearProxy('select')">批量解绑代理</el-dropdown-item>
                   <el-dropdown-item @click="onBatchClearProxy('all')">全解代理</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -138,24 +137,7 @@
       </template>
     </el-table-column>
     <el-table-column prop="id" align="left" label="名称/分组" min-width="90">
-      <template #default="scope">
-        <el-text size="small">{{ scope.row.name }}</el-text>
-        <br>
-        <el-space>
-          <ColorTag
-            v-if="scope.row.groupName"
-            :color="scope.row.groupColor"
-            round
-            size="small"
-            type="light"
-          >{{ scope.row.groupName }}
-          </ColorTag>
-          <el-icon :size="10" @click="onEditGroupBtn(scope.row)">
-            <Edit />
-          </el-icon>
-        </el-space>
 
-      </template>
     </el-table-column>
 
     <el-table-column prop="proxyId" label="代理信息" min-width="130"
@@ -181,24 +163,7 @@
         </el-space>
       </template>
     </el-table-column>
-    <el-table-column prop="tags" label="标签" min-width="180" show-overflow-tooltip>
-      <template #default="scope">
-        <el-space wrap>
-          <ColorTag v-for="item in scope.row.tags"
-                    :key="item.id"
-                    :color="item.color"
-                    round
-                    size="small"
-                    type="light"
-          >{{ item.name }}
-          </ColorTag>
-          <el-icon :size="10" @click="onEditTagBtn(scope.row)">
-            <Edit />
-          </el-icon>
-          <!--          <el-button size="small" :icon="Edit" @click="onEditTagBtn(scope.row)" circle />-->
-        </el-space>
-      </template>
-    </el-table-column>
+
     <el-table-column prop="remark" label="备注" min-width="150">
       <template #default="scope">
         <el-space>
