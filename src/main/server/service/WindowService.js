@@ -471,7 +471,7 @@ class WindowService {
    * @private
    */
   async _startChrome(winData, chromeEXE, profileDir) {
-
+    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxx')
     const chromePort = await this.getAvailablePort();
     let wid = winData.id;
     let finalProxy;
@@ -634,8 +634,7 @@ class WindowService {
           status: 0,
           closedAt: dbDao.raw("(strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime'))")
         });
-
-
+        this.windows.delete(wid);
       });
     } else {
       WSService.broadcast({
