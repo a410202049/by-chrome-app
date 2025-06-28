@@ -1,6 +1,7 @@
 node_modules
 chrome_data
 chromium
+*.json
 dist
 out
 .DS_Store
