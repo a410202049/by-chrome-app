@@ -51,130 +51,88 @@ export class ProxyService {
     let agent = undefined;
     let requestProxy = undefined;
     let result = { ipInfo: {}, pings: [], checkStatus: 0, updatedAt: 0 };
-
     const type = proxy.type.toLowerCase();
+    const axiosConfig = { timeout: 10000 };
     if (type === "socks5") {
       const agentInfo = this.getAgent(proxy);
       agent = agentInfo.agent;
+      axiosConfig.httpAgent = agent;
+      axiosConfig.httpsAgent = agent;
     } else {
       requestProxy = this.getRequestProxy(proxy);
+      requestProxy.protocol = 'http'
+      axiosConfig.proxy = requestProxy;
     }
-
-    let ipMsg;
-    if (toinfo) {
-      //在线获取IP信息
-      ipMsg = await this.getIpInfo(proxy.ip);
-      result.ipInfo = ipMsg;
-    } else {
-      //本地获取IP信息
-      ipMsg = await this.getGeoipIpInfo(proxy.ip);
-      result.ipInfo = ipMsg;
-    }
-    let count = 0;
-    for (const pin of PIN_URL) {
-      const startTime = Date.now();
-      try {
-        const response = await axios.get(pin.url, {
-          proxy: type !== "socks5" ? requestProxy : undefined,
-          timeout: 5000,
-          httpAgent: agent,
-          httpsAgent: agent
-        });
-
+    const startTime = Date.now();
+     try {
+        const response = await axios.get("http://ip-api.com/json", axiosConfig);
         const endTime = Date.now();
-        const elapsedTime = endTime - startTime; // Calculate the time taken for the request
+        const elapsedTime = endTime - startTime;
+        let checkStatus = 0;
+        let ipMsg = {};
         if (response.status === 200) {
-          count = count + 1;
+          checkStatus = 1
+          result.checkStatus = checkStatus;
+          console.log(response.data.query)
+          ipMsg = await this.getIpInfo(response.data.query);
+          console.log(111111111111111)
+          console.log(ipMsg)
+          result.ipInfo = ipMsg;
+
           result.pings.push({
-            name: pin.n,
+            name: proxy.ip,
             status: "connected",
             elapsedTime: elapsedTime
           });
         } else {
+          checkStatus = 0
+          result.checkStatus = checkStatus;
+          console.log(22222222222)
           result.pings.push({
-            name: pin.n,
+            name: proxy.ip,
             status: "failed",
             reason: `Status code: ${response.status}`,
             elapsedTime: elapsedTime
           });
         }
+        console.log(333333333333)
+        if (proxy.id) {
+          console.log(8888888)
+          const data = {
+            ...ipMsg,
+            ip:proxy.ip,
+            checkStatus: checkStatus,
+            checkData: JSON.stringify(result.pings),
+            updatedAt: dbDao.raw("strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')")
+          };
+          console.log('xxxxxxxxxxxxxxxxxxx')
+          console.log(data)
+          await this.proxydb.update(proxy.id, data);
+
+          WSService.broadcast({
+            type: "proxyPingResult", data: {
+              id: proxy.id,
+              checkStatus: checkStatus,
+              checkData: result.pings,
+              ...ipMsg,
+              ip:proxy.ip
+            }
+          });
+        }
+        
       } catch (e) {
-        logger.error(`代理IP网络检测 ip:${proxy.ip}, ping:${pin.n} 失败`, e.message);
+        console.log(e)
+        logger.error(`代理IP网络检测 ip:${proxy.ip}`, e.message);
         const endTime = Date.now();
         const elapsedTime = endTime - startTime;
         result.pings.push({
-          name: pin.n,
+          name: proxy.ip,
           status: "failed",
           reason: `${e.message}`,
           elapsedTime: elapsedTime
         });
       }
-    }
-
-    // //模拟数据
-    // let count = -1;
-    // result.pings = [
-    //   {
-    //     name: "谷歌",
-    //     status: "failed",
-    //     reason: "timeout of 5000ms exceeded",
-    //     elapsedTime: 7524
-    //   },
-    //   {
-    //     name: "推特",
-    //     status: "failed",
-    //     reason: "connect ETIMEDOUT 38.153.152.244:9594",
-    //     elapsedTime: 21038
-    //   },
-    //   {
-    //     name: "DC",
-    //     status: "failed",
-    //     reason: "timeout of 5000ms exceeded",
-    //     elapsedTime: 7104
-    //   },
-    //   {
-    //     name: "电报",
-    //     status: "failed",
-    //     reason: "connect ETIMEDOUT 38.153.152.244:9594",
-    //     elapsedTime: 21034
-    //   }
-    // ];
-    //
-    // await new Promise(resolve => setTimeout(resolve, 5000));
-    //模拟数据结束
-
-
-    let checkStatus = count > 0 ? 1 : -1;
-    result.checkStatus = checkStatus;
-    //若有ID，则更新
-    if (proxy.id) {
-      let data;
-      if (toinfo) {
-        data = {
-          ...ipMsg,
-          checkStatus: checkStatus,
-          checkData: JSON.stringify(result.pings),
-          updatedAt: dbDao.raw("strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')")
-        };
-      } else {
-        data = {
-          checkStatus: checkStatus,
-          checkData: JSON.stringify(result.pings),
-          updatedAt: dbDao.raw("strftime('%Y-%m-%d %H:%M:%S', 'now', 'localtime')")
-        };
-      }
-
-      await this.proxydb.update(proxy.id, data);
-
-      WSService.broadcast({
-        type: "proxyPingResult", data: {
-          id: proxy.id,
-          checkStatus: checkStatus,
-          checkData: result.pings,
-          ...ipMsg
-        }
-      });
-    }
+      console.log(99999)
     return result;
   }
 

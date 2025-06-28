@@ -95,7 +95,7 @@ class ByDB {
         table.integer("port").notNullable();  //端口号
         table.string("account");  //账号
         table.string("password");  //密码
-        table.string("proxy").notNullable();  //原始数据 SOCKS5
+        table.string("proxy");  //原始数据 SOCKS5
         table.string("timezone");  //时区
         table.string("countryCode");  //IP归属国家编号
         table.string("country");  //IP归属国家名称 US
